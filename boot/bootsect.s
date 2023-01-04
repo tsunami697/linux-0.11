@@ -43,24 +43,24 @@ ENDSEG   = SYSSEG + SYSSIZE		! where to stop loading
 ROOT_DEV = 0x306
 
 entry _start
-_start:
+_start:						! 当前运行在实模式下
 	mov	ax,#BOOTSEG
-	mov	ds,ax
+	mov	ds,ax				! ds段寄存器值 0x07c0, 用作ds:si
 	mov	ax,#INITSEG
-	mov	es,ax
-	mov	cx,#256
-	sub	si,si
-	sub	di,di
-	rep
-	movw
-	jmpi	go,INITSEG
+	mov	es,ax				! es段寄存器值 0x9000, 用作es:di
+	mov	cx,#256				! cx寄存器值 十进制256, 这里cx用作rep重复执行的次数累计
+	sub	si,si				! si,di进行减法 两个寄存器值清0。
+	sub	di,di				! 此时：ds:si的值：0x07c00:0 用作原始位置,引导扇区在这里  es:di的值：0x9000:0用作目的位置; si(助记start)
+	rep						! rep作用是依据cx的值， 重复执行后面的串传送指令
+	movw					! 结合rep, 重复执行movw指令，每执行一次, di,si递增或递减一个单元(取决于标志寄存器df,这里应该是使用了它的默认值代表递增)。则rep movsb循环实现cx个字符的传送。movw 传送Word两个字节，所以cx 定义为256。综上这段代码作用是将0x7c00:0处存放的引导扇区（512个）复制到0x9000:0处
+	jmpi	go,INITSEG		! jmpi是段间跳转指令，跳转到0x9000:go地址， 执行后cs的值变成0x9000
 go:	mov	ax,cs
 	mov	ds,ax
 	mov	es,ax
 ! put stack at 0x9ff00.
 	mov	ss,ax
 	mov	sp,#0xFF00		! arbitrary value >>512
-
+						! go标签代码执行后，内存有了一个基本分配： cs,ds,es,ss的值0x9000,sp的值0xff00
 ! load the setup-sectors directly after the bootblock.
 ! Note that 'es' is already set up.
 
