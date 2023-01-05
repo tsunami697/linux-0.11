@@ -45,10 +45,10 @@ ROOT_DEV = 0x306
 entry _start
 _start:						! 当前运行在实模式下
 	mov	ax,#BOOTSEG
-	mov	ds,ax				! ds段寄存器值 0x07c0, 用作ds:si
+	mov	ds,ax				! ds段寄存器值 0x07c0; 用作movw ds:si
 	mov	ax,#INITSEG
-	mov	es,ax				! es段寄存器值 0x9000, 用作es:di
-	mov	cx,#256				! cx寄存器值 十进制256, 这里cx用作rep重复执行的次数累计
+	mov	es,ax				! es段寄存器值 0x9000; 用作movw es:di
+	mov	cx,#256				! cx寄存器值 十进制256; cx用作rep重复执行的次数累计
 	sub	si,si				! si,di进行减法 两个寄存器值清0。
 	sub	di,di				! 此时：ds:si的值：0x07c00:0 用作原始位置,引导扇区在这里  es:di的值：0x9000:0用作目的位置; si(助记start)
 	rep						! rep作用是依据cx的值， 重复执行后面的串传送指令
